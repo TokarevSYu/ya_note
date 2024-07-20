@@ -1,0 +1,34 @@
+from django.contrib.auth import get_user_model
+from django.test import Client, TestCase
+from django.urls import reverse
+from notes.models import Note
+
+User = get_user_model()
+
+
+class TestNote(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.author = User.objects.create_user(username='author',
+                                              password='password')
+        cls.non_author = User.objects.create_user(username='non_author',
+                                                  password='password')
+        cls.author_client = Client()
+        cls.non_author_client = Client()
+        cls.author_client.login(username='author', password='password')
+        cls.non_author_client.login(username='non_author', password='password')
+
+        cls.note = Note.objects.create(
+            title='Test Note',
+            text='This is a test note',
+            slug='test-note',
+            author=cls.author
+        )
+
+        cls.LIST_URL = reverse('notes:list')
+        cls.ADD_URL = reverse('notes:add')
+        cls.SUCCESS_URL = reverse('notes:success')
+        cls.EDIT_URL = reverse('notes:edit', args=[cls.note.slug])
+        cls.DELETE_URL = reverse('notes:delete', args=[cls.note.slug])
+        cls.LOGIN_URL = reverse('users:login')
+        cls.detail_url = reverse('notes:detail', args=[cls.note.slug])
